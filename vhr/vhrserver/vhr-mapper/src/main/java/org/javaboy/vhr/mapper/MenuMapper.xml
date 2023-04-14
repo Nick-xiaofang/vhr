@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="org.javaboy.vhr.mapper.MenuMapper" >
+
   <resultMap id="BaseResultMap" type="org.javaboy.vhr.model.Menu" >
     <id column="id" property="id" jdbcType="INTEGER" />
     <result column="url" property="url" jdbcType="VARCHAR" />
@@ -10,11 +11,15 @@
     <result column="iconCls" property="iconCls" jdbcType="VARCHAR" />
     <result column="parentId" property="parentId" jdbcType="INTEGER" />
     <result column="enabled" property="enabled" jdbcType="BIT" />
+
     <association property="meta" javaType="org.javaboy.vhr.model.Meta">
       <result column="keepAlive" property="keepAlive" jdbcType="BIT" />
       <result column="requireAuth" property="requireAuth" jdbcType="BIT" />
     </association>
+
   </resultMap>
+
+
   <resultMap id="Menus2" type="org.javaboy.vhr.model.Menu" extends="BaseResultMap">
     <collection property="children" ofType="org.javaboy.vhr.model.Menu">
       <id column="id2" property="id" jdbcType="INTEGER" />
@@ -31,6 +36,7 @@
       </association>
     </collection>
   </resultMap>
+
   <resultMap id="MenuWithRole" type="org.javaboy.vhr.model.Menu" extends="BaseResultMap">
     <collection property="roles" ofType="org.javaboy.vhr.model.Role">
       <id column="rid" property="id"/>
@@ -38,6 +44,7 @@
       <result column="rnameZh" property="nameZh"/>
     </collection>
   </resultMap>
+
   <resultMap id="MenuWithChildren" type="org.javaboy.vhr.model.Menu" extends="BaseResultMap">
     <id column="id1" property="id"/>
     <result column="name1" property="name"/>
@@ -56,9 +63,13 @@
   <select id="getAllMenus" resultMap="MenuWithChildren">
     select m1.`id` as id1,m1.`name` as name1,m2.`id` as id2,m2.`name` as name2,m3.`id` as id3,m3.`name` as name3 from menu m1,menu m2,menu m3 where m1.`id`=m2.`parentId` and m2.`id`=m3.`parentId` and m3.`enabled`=true order by m1.`id`,m2.`id`,m3.`id`
   </select>
+
   <select id="getAllMenusWithRole" resultMap="MenuWithRole">
-    select m.*,r.`id` as rid,r.`name` as rname,r.`nameZh` as rnameZh from menu m,menu_role mr,role r where m.`id`=mr.`mid` and mr.`rid`=r.`id` order by m.`id`
+    select m.*,r.`id` as rid,r.`name` as rname,r.`nameZh` as rnameZh
+    from menu m,menu_role mr,role r
+    where m.`id`=mr.`mid` and mr.`rid`=r.`id` order by m.`id`
   </select>
+
   <select id="getMenusByHrId" resultMap="Menus2">
     select distinct m1.*,m2.`id` as id2,m2.`component` as component2,m2.`enabled` as enabled2,m2.`iconCls` as iconCls2,m2.`keepAlive` as keepAlive2,m2.`name` as name2,m2.`parentId` as parentId2,m2.`requireAuth` as requireAuth2,m2.`path` as path2 from menu m1,menu m2,hr_role hrr,menu_role mr where m1.`id`=m2.`parentId` and hrr.`hrid`=#{hrid} and hrr.`rid`=mr.`rid` and mr.`mid`=m2.`id` and m2.`enabled`=true order by m1.`id`,m2.`id`
   </select>

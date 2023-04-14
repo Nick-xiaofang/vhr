@@ -27,20 +27,37 @@ import java.util.List;
  */
 @Component
 public class CustomFilterInvocationSecurityMetadataSource implements FilterInvocationSecurityMetadataSource {
+
     @Autowired
     MenuService menuService;
+
     AntPathMatcher antPathMatcher = new AntPathMatcher();
+
+    /**
+     * /employee/basic/hello ,这个地址既能被 /employee/** 匹配，也能被 /employee/basic/** 匹配
+     * 所以查询数据库时，存在优先级问题，将/employee/basic/**放在前边
+     *
+     * getAttributes(Object o) 方法返回的集合最终会来到 AccessDecisionManager 类中
+     *
+     * @param object
+     * @return
+     * @throws IllegalArgumentException
+     */
     @Override
     public Collection<ConfigAttribute> getAttributes(Object object) throws IllegalArgumentException {
+        //提取出当前的请求 url
         String requestUrl = ((FilterInvocation) object).getRequestUrl();
         List<Menu> menus = menuService.getAllMenusWithRole();
+
         for (Menu menu : menus) {
             if (antPathMatcher.match(menu.getUrl(), requestUrl)) {
+                //当前URL和Menu中URL匹配，能匹配就获取到他的角色，并放到一个数组
                 List<Role> roles = menu.getRoles();
                 String[] str = new String[roles.size()];
                 for (int i = 0; i < roles.size(); i++) {
                     str[i] = roles.get(i).getName();
                 }
+                //最后利用 SecurityConfig.createList 方法来创建一个角色集合。
                 return SecurityConfig.createList(str);
             }
         }

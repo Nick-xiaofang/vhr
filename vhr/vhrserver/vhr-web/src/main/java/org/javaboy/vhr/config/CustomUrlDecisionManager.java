@@ -22,10 +22,21 @@ import java.util.Collection;
  */
 @Component
 public class CustomUrlDecisionManager implements AccessDecisionManager {
+
+    /**
+     *
+     * @param authentication 当前登录用户的信息
+     * @param object
+     * @param configAttributes 传过来的角色
+     * @throws AccessDeniedException
+     * @throws InsufficientAuthenticationException
+     */
     @Override
     public void decide(Authentication authentication, Object object, Collection<ConfigAttribute> configAttributes) throws AccessDeniedException, InsufficientAuthenticationException {
+
         for (ConfigAttribute configAttribute : configAttributes) {
             String needRole = configAttribute.getAttribute();
+            //ROLE_LOGIN 则表示登录即可访问，和角色没有关系，authentication 是 AnonymousAuthenticationToken 的实例，表示没登录
             if ("ROLE_LOGIN".equals(needRole)) {
                 if (authentication instanceof AnonymousAuthenticationToken) {
                     throw new AccessDeniedException("尚未登录，请登录!");
@@ -33,6 +44,7 @@ public class CustomUrlDecisionManager implements AccessDecisionManager {
                     return;
                 }
             }
+            //遍历查看当前用户的角色列表中是否具备需要的权限，如果具备就直接返回，否则就抛异常
             Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
             for (GrantedAuthority authority : authorities) {
                 if (authority.getAuthority().equals(needRole)) {

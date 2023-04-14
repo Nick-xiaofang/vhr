@@ -24,20 +24,15 @@ import org.springframework.security.web.session.ConcurrentSessionFilter;
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
 
-/**
- * @作者 江南一点雨
- * @公众号 江南一点雨
- * @微信号 a_java_boy
- * @GitHub https://github.com/lenve
- * @博客 http://wangsong.blog.csdn.net
- * @网站 http://www.javaboy.org
- */
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
+
     @Autowired
     HrService hrService;
+
     @Autowired
     CustomFilterInvocationSecurityMetadataSource customFilterInvocationSecurityMetadataSource;
+
     @Autowired
     CustomUrlDecisionManager customUrlDecisionManager;
 
@@ -106,6 +101,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+        //通过 withObjectPostProcessor 将刚刚创建的 customUrlDecisionManager 和 customFilterInvocationSecurityMetadataSource 注入进来
         http.authorizeRequests()
                 .withObjectPostProcessor(new ObjectPostProcessor<FilterSecurityInterceptor>() {
                     @Override
